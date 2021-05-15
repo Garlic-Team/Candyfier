@@ -63,7 +63,6 @@ const checkUrl = async (url) => {
 module.exports = {
     name: "blurple",
     description: "Discord Brand Filters",
-    guildOnly: "839570713220218910",
     expectedArgs: [
         {
             name: "type",
