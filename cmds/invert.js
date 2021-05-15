@@ -61,7 +61,6 @@ const checkUrl = async (url) => {
 module.exports = {
     name: "invert",
     description: "Invert image :D",
-    guildOnly: "839570713220218910",
     expectedArgs: [
         {
             name: "user",
