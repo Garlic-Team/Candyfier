@@ -10,14 +10,13 @@ const fs = require('fs');
 client.on("ready", () => {
     new GCommands(client, {
         cmdDir: "cmds",
+        language: "english",
+        unkownCommandMessage: false,
         slash: {
            slash: 'true',
            prefix: 'QPWEPOJCKKCJNKCNKLYBNCMBEQWIOQWHEIQWEUIODHASKFHKASFHASKF'
         },
-        cooldown: {
-            message: "Please wait `{cooldown}` second(s).",
-            default: 3 
-        }
+        defaultCooldown: 3
     })
 
     setInterval(() => {
