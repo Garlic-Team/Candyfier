@@ -118,12 +118,12 @@ module.exports = {
         if (args[0] && args[1]) {
             respond("Your Image is loading!")
 
-            let memberFromArgs = guild.members.cache.get(args[1].replace(/[!@<>]/g, ''));
+            let memberFromArgs = guild.members.cache.get(args[1], '');
 
             let theURL = args[1];
             let isGif = false;
             if (memberFromArgs) {
-                theURL = member.user.displayAvatarURL({ size: 4096, format: "png" });
+                theURL = memberFromArgs.user.displayAvatarURL({ size: 4096, format: "png" });
 
                 if (await checkUrl(memberFromArgs.user.displayAvatarURL({ size: 4096, format: "gif" }))) {
                     isGif = true;
@@ -214,9 +214,8 @@ module.exports = {
 
                 edit({
                   content: `Your Image is ready! <@${member.user.id}>`,
-                  attachments: new MessageAttachment(blurpled, `${args[0]}.gif`)
+                  attachments: new MessageAttachment(blurpled, `${args[0]}.png`)
                 }).catch(e => {
-                  console.log(e)
                     edit(`Image has more than 8 mb. <@${member.user.id}>`)
                 });
             }

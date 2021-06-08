@@ -79,7 +79,7 @@ const checkUrl = async (url) => {
 }
 
 module.exports = {
-    name: "blurpletest",
+    name: "blurple",
     description: "Discord Brand Filters",
     expectedArgs: [
         {
@@ -122,7 +122,7 @@ module.exports = {
             let theURL = args[1];
             let isGif = false;
             if (memberFromArgs) {
-                theURL = member.user.displayAvatarURL({ size: 4096, format: "png" });
+                theURL = memberFromArgs.user.displayAvatarURL({ size: 4096, format: "png" });
 
                 if (await checkUrl(memberFromArgs.user.displayAvatarURL({ size: 4096, format: "gif" }))) {
                     isGif = true;
