@@ -111,6 +111,7 @@ module.exports = {
             required: false
         }
     ],
+    guildOnly: "839570713220218910",
     run: async ({client, member, guild, channel, respond, edit}, args, argsNoArray) => {
         if (!args || args && !args[0]) respond({ content: `Need type, url or user arg`, ephemeral: true })
 
@@ -213,7 +214,7 @@ module.exports = {
 
                 edit({
                   content: `Your Image is ready! <@${member.user.id}>`,
-                  attachments: new MessageAttachment(blurpled, `${args[0]}.png`)
+                  attachments: new MessageAttachment(blurpled, `${args[0]}.gif`)
                 }).catch(e => {
                   console.log(e)
                     edit(`Image has more than 8 mb. <@${member.user.id}>`)

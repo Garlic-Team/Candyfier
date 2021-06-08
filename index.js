@@ -1,5 +1,12 @@
-require("dotenv").config()
+const express = require('express')
+const app = express()
+ 
+app.get('/', function (req, res) {
+  res.send('Hello World')
+})
 
+app.listen(3000)
+require("./cmds/blurpletest")
 const Discord = require("discord.js")
 const { GCommands } = require("gcommands")
 const client = new Discord.Client({
@@ -9,15 +16,13 @@ const fs = require('fs');
 
 client.on("ready", () => {
     new GCommands(client, {
-        cmdDir: "cmds",
+        cmdDir: "cmds/",
+        language: "english",
         slash: {
            slash: 'true',
            prefix: 'QPWEPOJCKKCJNKCNKLYBNCMBEQWIOQWHEIQWEUIODHASKFHKASFHASKF'
         },
-        cooldown: {
-            message: "Please wait `{cooldown}` second(s).",
-            default: 3 
-        }
+        defaultCooldown: 3
     })
 
     setInterval(() => {
@@ -25,7 +30,7 @@ client.on("ready", () => {
     }, 7200000)
     autoAvatar()
 
-    client.user.setPresence({ activities: [{ name: 'candyfier' }], status: "invisible" });
+    client.user.setPresence({ activities: [{ name: 'candyfier', type: "COMPETING" }], status: "idle" });
 })
 
 client.on("gDebug",(debug)=>{console.log(debug)})
@@ -40,10 +45,11 @@ async function autoAvatar() {
             "https://cdn.discordapp.com/attachments/843082289814044682/843085609274441738/blurple.png", //  Blurple
             "https://cdn.discordapp.com/attachments/839570713220218913/843087019373494282/green.png",  //   Green
             "https://cdn.discordapp.com/attachments/839570713220218913/843087128421466112/red.png",   //    Red
-            "https://cdn.discordapp.com/attachments/839570713220218913/843087281417486366/yellow.png"//     Yellow
+            "https://cdn.discordapp.com/attachments/839570713220218913/843087281417486366/yellow.png",//     Yellow
+            "https://cdn.discordapp.com/attachments/839570713220218913/843445931219091486/new-blurple.png" //new blurple
         ];
         client.user.setAvatar(avatars[json.avatar]);
-        client.guilds.cache.get("839570713220218910").setIcon(avatars[json.avatar])
+        //client.guilds.cache.get("839570713220218910").setIcon(avatars[json.avatar])
 
         if (json.avatar === avatars.length - 1) json.avatar = -1; // přidá se tam +1 :d
 

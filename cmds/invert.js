@@ -6,21 +6,6 @@ const Axios = require("axios");
 const extractFrames = require("gif-extract-frames");
 const GIFEncoder = require('gif-encoder-2');
 
-let config = {
-    oversaturate: true,
-    heat: 45,
-    colorize: [112, 135, 215],
-    colors: {
-        newBlurple: [88, 101, 242],
-        oldBlurple: [114, 137, 218],
-        darkBlurple: [78, 93, 148],
-        green: [87, 242, 135],
-        yellow: [254, 231, 92],
-        fuschia: [235, 69, 158],
-        red: [237, 66, 69],
-    }
-};
-
 const downloadURL = async (url, name) => {
     await (async () => new Promise(async res => {
         let r = await Axios({
@@ -75,40 +60,28 @@ module.exports = {
             required: false
         }
     ],
-    run: async (client, slash) => {
-        var args = slash.data.options;
-        var channel = client.channels.cache.get(slash.channel_id);
-        var guild = client.guilds.cache.get(slash.guild_id);
-        var guildMember = guild.members.cache.get("839570771574915144")
-
+    run: async ({client, channel, guild, respond, edit}, args) => {
         if (!args || args && !args[0]) return { content: `Need url or user arg`, ephemeral: true }
 
-        if (args[0].name === "user" || args[0].name === "url") {
-            client.api.interactions(slash.id, slash.token).callback.post({
-                data: {
-                  type: 4,
-                  data: {
-                      content: "Your Image is loading!"
-                  }
-                },
-            })
+        if (args[0]) {
+            respond("Your Image is loading!")
 
-            var member = guild.members.cache.get(args[0].value.replace(/[!@<>]/g, ''));
+            let memberFromArgs = guild.members.cache.get(args[0].replace(/[!@<>]/g, ''));
 
-            let theURL = args[0].value;
+            let theURL = args[0];
             let isGif = false;
-            if (member) {
-                theURL = member.user.displayAvatarURL({ size: 4096, format: "png" });
+            if (memberFromArgs) {
+                theURL = memberFromArgs.user.displayAvatarURL({ size: 4096, format: "png" });
 
-                if (await checkUrl(member.user.displayAvatarURL({ size: 4096, format: "gif" }))) {
+                if (await checkUrl(memberFromArgs.user.displayAvatarURL({ size: 4096, format: "gif" }))) {
                     isGif = true;
-                    theURL = member.user.displayAvatarURL({ size: 4096, format: "gif" });
+                    theURL = memberFromArgs.user.displayAvatarURL({ size: 4096, format: "gif" });
                 }
             } else {
                 let u = new URL(theURL);
 
                 if(![".png",".gif",".jpg"].some(v => u.pathname.endsWith(v))) {
-                    channel.send(`Unsupported image type (gif/png/jpg only)! <@${slash.member.user.id}>`, { reply: { messageReference: guildMember.lastMessageID }})
+                    respond(`Unsupported image type (gif/png/jpg only)!`)
                     return;
                 }
                 if (u.pathname.endsWith(".gif")) isGif = true;
@@ -154,14 +127,11 @@ module.exports = {
 
                 let invert = encoder.out.getData();
 
-                channel.send(`Your Image is ready! <@${slash.member.user.id}>`, {
-                    reply: { messageReference: guildMember.lastMessageID },
-                    files: [{
-                        attachment: invert,
-                        name: "invert.gif"
-                    }]
+                edit({
+                  content: `Your Image is ready! <@${member.user.id}>`,
+                  attachments: new MessageAttachment(invert, `${args[0]}.gif`)
                 }).catch(e => {
-                    channel.send(`Image has more than 8 mb <@${slash.member.user.id}>`)
+                    edit(`Image has more than 8 mb. <@${member.user.id}>`)
                 });
 
                 setTimeout(() => {
@@ -183,14 +153,12 @@ module.exports = {
     
                 let invert = await canvas.toBuffer("image/png");
 
-                channel.send(`Your Image is ready! <@${slash.member.user.id}>`, {
-                    reply: { messageReference: guildMember.lastMessageID },
-                    files: [{
-                        attachment: invert,
-                        name: "invert.png"
-                    }]
+                edit({
+                  content: `Your Image is ready! <@${member.user.id}>`,
+                  attachments: new MessageAttachment(invert, `${args[0]}.png`)
                 }).catch(e => {
-                    channel.send(`Image has more than 8 mb <@${slash.member.user.id}>`)
+                  console.log(e)
+                    edit(`Image has more than 8 mb. <@${member.user.id}>`)
                 });
             }
 
