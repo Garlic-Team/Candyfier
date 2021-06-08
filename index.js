@@ -16,8 +16,14 @@ const fs = require('fs');
 
 client.on("ready", () => {
     new GCommands(client, {
+<<<<<<< HEAD
         cmdDir: "cmds/",
         language: "english",
+=======
+        cmdDir: "cmds",
+        language: "english",
+        unkownCommandMessage: false,
+>>>>>>> origin/main
         slash: {
            slash: 'true',
            prefix: 'QPWEPOJCKKCJNKCNKLYBNCMBEQWIOQWHEIQWEUIODHASKFHKASFHASKF'
