@@ -2,44 +2,87 @@ const { SlashCommand, MessageSelectMenu, MessageSelectMenuOption, MessageActionR
 const { MessageAttachment, Message } = require("discord.js");
 const { createCanvas, loadImage } = require("canvas");
 
-let palette = {
-    "new-blurple": [88, 101, 242],
-    "old-blurple": [114, 137, 218],
-    "dark-blurple": [78, 93, 148],
-
-    "hypesquad-yellow": [248, 165, 50],
-    "brilliance-red": [244, 123, 103],
-    "bravery-purple": [156, 132, 239],
-    "balance-cyan": [69, 221, 192],
-
-    "developer-blue": [62, 112, 221],
-    "bug-hunter-green": [72, 183, 132],
-    "partner-blue": [65, 135, 237],
-
-    "not-quite-black": [35, 39, 42],
-    "dark-mode-gray": [54, 57, 63],
-    "grayple": [135, 170, 181],
-    "dark-but-not-black": [44, 47, 51],
-
-    "nitro-blue": [79, 93, 127],
-    "nitro-gray": [183, 194, 206],
-    "boost-pink": [244, 127, 255],
-
-    "green": [87, 242, 135],
-    "yellow": [254, 231, 92],
-    "fuschia": [235, 69, 158],
-    "red": [237, 66, 69]
+let flags = {
+    gay: [
+        [254, 1, 6],
+        [252, 135, 4],
+        [247, 229, 9],
+        [1, 162, 56],
+        [1, 91, 250],
+        [163, 0, 141]
+    ],
+    lesbian: [
+        [161, 2, 95],
+        [181, 82, 146],
+        [212, 97, 164],
+        [238, 234, 233],
+        [228, 172, 207],
+        [202, 76, 88],
+        [141, 27, 3]
+    ],
+    transgender: [
+        [97, 202, 249],
+        [226, 154, 200],
+        [255, 255, 251],
+        [226, 154, 200],
+        [97, 202, 249],
+    ],
+    bisexual: [
+        [214, 0, 111],
+        [214, 0, 111],
+        [115, 78, 148],
+        [0, 55, 172],
+        [0, 55, 172]
+    ],
+    pansexual: [
+        [255, 33, 146],
+        [253, 219, 0],
+        [1, 147, 255]
+    ],
+    asexual: [
+        [0, 0, 0],
+        [162, 162, 162],
+        [255, 255, 255],
+        [127, 0, 129]
+    ],
+    intersex: [
+        [237, 170, 250],
+        [255, 255, 255],
+        [164, 204, 239],
+        [247, 182, 225],
+        [255, 255, 255],
+        [237, 170, 250]
+    ],
+    genderqueer: [
+        [186, 124, 221],
+        [255, 255, 255],
+        [73, 128, 35]
+    ],
+    heterosexual: [
+        [6, 6, 6],
+        [53, 53, 53],
+        [105, 105, 105],
+        [186, 186, 186],
+        [255, 255, 255]
+    ]
 }
 
-let modifyData = (data, palette, contrast = 40) => {
+let modifyData = (data, palette, contrast = 40, width, height) => {
     let dat = data;
+    let switc = Math.round(height / palette.length);
+
     for (let i = 0; i < dat.data.length; i += 4) {
         let d = dat.data;
         let magn = (d[i], d[i + 1], d[i + 2]) / 3 / (100 - contrast);
+        
+        let j = i / 4;
+        let y = Math.floor(j / width);
+        let rw = Math.floor(y / switc);
+        if (!palette[rw]) rw = palette.length - 1;
 
-        d[i] = magn * palette[0];
-        d[i + 1] = magn * palette[1];
-        d[i + 2] = magn * palette[2];
+        d[i] = magn * palette[rw][0];
+        d[i + 1] = magn * palette[rw][1];
+        d[i + 2] = magn * palette[rw][2];
     }
 
     return dat;
@@ -48,8 +91,8 @@ let modifyData = (data, palette, contrast = 40) => {
 module.exports = class Text extends Command {
     constructor(...args) {
         super(...args, {
-            name: "blurple",
-            description: "Blurpify an avatar",
+            name: "pride",
+            description: "Add's a pride gradient over an avatar",
             slash: true,
             expectedArgs: [
                 {
@@ -98,18 +141,18 @@ module.exports = class Text extends Command {
 
         let dropdown = new MessageSelectMenu()
             .setPlaceholder("Select type")
-            .setID(`blurpleSelector`)
+            .setID(`prideSelecor`)
             .setMaxValues(1)
             .setMinValues(1)
-            .addOptions(Object.entries(palette).map(([k, v]) => 
+            .addOptions(Object.entries(flags).map(([k, v]) => 
                 new MessageSelectMenuOption()
                     .setLabel(k.split("-").map((xd) => xd[0].toUpperCase() + xd.slice(1).toLowerCase()).join(" "))
-                    .setValue(`blurpleSelector:${k}`)
-                    .setDescription(`Color: ${k.split("-").map((xd) => xd[0].toUpperCase() + xd.slice(1).toLowerCase()).join(" ")}`)
+                    .setValue(`prideSelecor:${k}`)
+                    .setDescription(`${k.split("-").map((xd) => xd[0].toUpperCase() + xd.slice(1).toLowerCase()).join(" ")} Flag 🏳️‍🌈`)
             ));
 
         let pickColorMsg = await respond({
-            content: "**Pick a color**",
+            content: "**Pick a pride flag**",
             components: new MessageActionRow().addComponent(dropdown)
         });
 
@@ -132,7 +175,7 @@ module.exports = class Text extends Command {
 
             let contrast = parseInt(options.contrast) || 40;
             contrast = contrast < 0 ? 0 : contrast > 50 ? 50 : contrast;
-            let modifiedData = await modifyData(data, palette[color], contrast);
+            let modifiedData = await modifyData(data, flags[color], contrast, buffTyp[1].width, buffTyp[1].height);
             ctx.putImageData(modifiedData, 0, 0);
 
             let nbuffer = canvas.toBuffer(buffTyp[0].mime);
@@ -140,7 +183,7 @@ module.exports = class Text extends Command {
             menu.reply.send({
                 ephemeral: false,
                 content: `Here is your image! ${member}`,
-                attachments: new MessageAttachment(nbuffer, `blurpified.${buffTyp[0].ext}`)
+                attachments: new MessageAttachment(nbuffer, `pride-${color}.${buffTyp[0].ext}`)
             });
             channel.stopTyping(true);
         });

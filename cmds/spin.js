@@ -1,25 +1,13 @@
 const { SlashCommand, MessageSelectMenu, MessageSelectMenuOption, MessageActionRow, Command } = require("gcommands");
 const { MessageAttachment, Message } = require("discord.js");
 const { createCanvas, loadImage } = require("canvas");
-
-let modifyData = (data) => {
-    let dat = data;
-    for (let i = 0; i < dat.data.length; i += 4) {
-        let d = dat.data;
-
-        d[i] = 255 - d[i];
-        d[i + 1] = 255 - d[i + 1];
-        d[i + 2] = 255 - d[i + 2];
-    }
-
-    return dat;
-}
+const gifEncoder = require("gif-encoder-2");
 
 module.exports = class Text extends Command {
     constructor(...args) {
         super(...args, {
-            name: "invert",
-            description: "Inverts the color of an avatar",
+            name: "spin",
+            description: "Spins an avatar",
             slash: true,
             expectedArgs: [
                 {
@@ -32,6 +20,12 @@ module.exports = class Text extends Command {
                     name: "url",
                     type: SlashCommand.STRING,
                     description: "The image URL to put a troll face over",
+                    required: false
+                },
+                {
+                    name: "speed",
+                    type: SlashCommand.INTEGER,
+                    description: "Speed (8-20)",
                     required: false
                 }
             ],
@@ -64,17 +58,31 @@ module.exports = class Text extends Command {
         let ctx = canvas.getContext("2d");
         let img = await loadImage(buffTyp[3]);
 
-        ctx.drawImage(img, 0, 0);
-        let data = await ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let modifiedData = await modifyData(data);
-        ctx.putImageData(modifiedData, 0, 0);
+        let speed = (20 - parseInt(options.speed)) || (20 - 8);
+        speed = speed < 8 ? 8 : speed > 20 ? 20 : speed;
+        let addX = 360 / speed;
 
-        let nbuffer = canvas.toBuffer(buffTyp[0].mime);
+        let encoder = new gifEncoder(canvas.width, canvas.height);
+        encoder.setDelay(1);
+        encoder.start();
+
+        for (let i = 0; i < 360; i += addX) {
+            ctx.save();
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.translate(buffTyp[1].width / 2, buffTyp[1].height / 2);
+            ctx.rotate((Math.PI / 180) * i);
+            ctx.drawImage(img, -buffTyp[1].width / 2, -buffTyp[1].height / 2, buffTyp[1].width, buffTyp[1].height);
+            ctx.restore();
+            encoder.addFrame(ctx);
+        }
+
+        encoder.finish();
+        let buff = encoder.out.getData();
 
         respond({
             ephemeral: false,
             content: `Here is your image! ${member}`,
-            attachments: new MessageAttachment(nbuffer, `inverted.${buffTyp[0].ext}`)
+            attachments: new MessageAttachment(buff, `spin.gif`)
         });
         channel.stopTyping(true);
     }

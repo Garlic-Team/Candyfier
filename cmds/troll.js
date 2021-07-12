@@ -2,14 +2,26 @@ const { SlashCommand, MessageSelectMenu, MessageSelectMenuOption, MessageActionR
 const { MessageAttachment, Message } = require("discord.js");
 const { createCanvas, loadImage } = require("canvas");
 
-let modifyData = (data) => {
+let modifyData = (data, troll, whitebg) => {
     let dat = data;
     for (let i = 0; i < dat.data.length; i += 4) {
         let d = dat.data;
+        let tr = troll.data;
 
-        d[i] = 255 - d[i];
-        d[i + 1] = 255 - d[i + 1];
-        d[i + 2] = 255 - d[i + 2];
+        let comp = (tr[i] + tr[i + 1] + tr[i + 2]) / 3;
+        let val = 30;
+
+        if (comp < val) {
+            d[i] = comp;
+            d[i + 1] = comp;
+            d[i + 2] = comp;
+        } else if (d[i + 3] < 60 && whitebg) {
+            d[i] = 255 - d[i + 3];
+            d[i + 1] = 255 - d[i + 3];
+            d[i + 2] = 255 - d[i + 3];
+        }
+
+        d[i + 3] = tr[i + 3];
     }
 
     return dat;
@@ -18,10 +30,26 @@ let modifyData = (data) => {
 module.exports = class Text extends Command {
     constructor(...args) {
         super(...args, {
-            name: "invert",
-            description: "Inverts the color of an avatar",
+            name: "troll",
+            description: "Masks a beautiful troll face around an avatar",
             slash: true,
             expectedArgs: [
+                {
+                    name: "background",
+                    type: 3,
+                    description: "Color of the image's background",
+                    required: true,
+                    choices: [
+                        {
+                            name: "White",
+                            value: "white"
+                        },
+                        {
+                            name: "Black",
+                            value: "black"
+                        }
+                    ]
+                },
                 {
                     name: "user",
                     type: SlashCommand.USER,
@@ -64,9 +92,15 @@ module.exports = class Text extends Command {
         let ctx = canvas.getContext("2d");
         let img = await loadImage(buffTyp[3]);
 
-        ctx.drawImage(img, 0, 0);
+        let canvas2 = createCanvas(buffTyp[1].width, buffTyp[1].height);
+        let ctx2 = canvas2.getContext("2d");
+        let img2 = await loadImage(__dirname + "/../images/trollface.png");
+        ctx2.drawImage(img2, 0, 0, canvas2.width, canvas2.height);
+
+        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
         let data = await ctx.getImageData(0, 0, canvas.width, canvas.height);
-        let modifiedData = await modifyData(data);
+        let data2 = await ctx2.getImageData(0, 0, canvas2.width, canvas2.height);
+        let modifiedData = await modifyData(data, data2, options.background === "white");
         ctx.putImageData(modifiedData, 0, 0);
 
         let nbuffer = canvas.toBuffer(buffTyp[0].mime);
@@ -74,7 +108,7 @@ module.exports = class Text extends Command {
         respond({
             ephemeral: false,
             content: `Here is your image! ${member}`,
-            attachments: new MessageAttachment(nbuffer, `inverted.${buffTyp[0].ext}`)
+            attachments: new MessageAttachment(nbuffer, `trolled.${buffTyp[0].ext}`)
         });
         channel.stopTyping(true);
     }
