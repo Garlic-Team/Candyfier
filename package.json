@@ -9,7 +9,7 @@
     "discord.js": "^12.5.3",
     "dotenv": "^9.0.2",
     "express": "^4.17.1",
-    "fs": "0.0.1-security",
+    "fs": "0.0.2",
     "gcommands": "github:Garlic-Team/GCommands#dev",
     "gif-encoder-2": "^1.0.5",
     "gif-extract-frames": "^1.0.2",
